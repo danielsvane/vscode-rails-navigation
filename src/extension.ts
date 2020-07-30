@@ -1,39 +1,76 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+// Extracts info about file, ie is it a model, view, what is the namespace, etc
+function getFileInfo (fullPath:String) {
+	// Only use the path after /app
+	let path = fullPath.split('app/')[1];
+	// Separate into parts
+	let parts = path.split('/');
+
+	let type = parts[0].slice(0, -1); // Remove last part of type so models -> model
+	let namespaces = parts.slice(1, parts.length - 1);
+	let file = parts[parts.length - 1].split('.');
+	let fileName = file[0];
+	let fileType = file[1];
+
+	let result = {
+		type,
+		namespaces,
+		fileName,
+		fileType
+	};
+
+	console.log(result);
+	return result;
+}
+
+function modelNameToControllerName (term:String) {
+	return term + "s_controller";
+}
+
+async function openController (path:String) {
+	let { namespaces, fileName } = getFileInfo(path);
+	let controllerPath =
+		'controllers/' +
+		namespaces.join('/') +
+		'/' +
+		modelNameToControllerName(fileName) +
+		'.rb';
+
+	console.log(controllerPath);
+
+	vscode.window.showQuickPick([controllerPath]).then(selection => {
+		if (selection) {
+			vscode.window.showInformationMessage(selection);
+		}
+	});
+	// let files = await vscode.workspace.findFiles('app/controllers/*.rb', '**/node_modules/**', 10);
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "rails-navigation" is now active!');
+	console.log('Ready');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('rails-navigation.helloWorld', async () => {
-		// The code you place here will be executed every time your command is executed
+	let disposable = vscode.commands.registerCommand('rails-navigation.listFiles', async () => {
 
-		var currentlyOpenTabfilePath = vscode.window.activeTextEditor?.document.uri.fsPath;
+		let path = vscode.window.activeTextEditor?.document.uri.fsPath;
 
-		// Display a message box to the user
-		let files = await vscode.workspace.findFiles('app/controllers/*.rb', '**/node_modules/**', 10);
-		let fileNames = files.map(file => file.path);
+		// // Display a message box to the user
+		// let files = await vscode.workspace.findFiles('app/controllers/*.rb', '**/node_modules/**', 10);
+		// let fileNames = files.map(file => file.path);
 
-		// console.log(files);
-		vscode.window.showQuickPick(fileNames).then(selection => {
-			if (selection) {
-				vscode.window.showInformationMessage(selection);
-			}
-		});
+		// vscode.window.showQuickPick(fileNames).then(selection => {
+		// 	if (selection) {
+		// 		vscode.window.showInformationMessage(selection);
+		// 	}
+		// });
 
-		vscode.window.showInformationMessage('lol!' + currentlyOpenTabfilePath);
+		if (path) {
+			openController(path);
+		}
 	});
 
 	context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}

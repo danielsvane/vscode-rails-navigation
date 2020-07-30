@@ -10,14 +10,21 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:rails-navigation.helloWorld"
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "rails-navigation.helloWorld",
-				"title": "Hello World"
+				"command": "rails-navigation.listFiles",
+				"title": "List related files"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "rails-navigation.listFiles",
+				"key": "ctrl+alt+l",
+				"mac": "cmd+alt+l"
 			}
 		]
 	},
