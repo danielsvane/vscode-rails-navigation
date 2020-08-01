@@ -12,15 +12,16 @@ function getFileInfo (fullPath:String) {
 	let file = parts[parts.length - 1].split('.');
 	let fileName = file[0];
 	let fileType = file[1];
+	let resource = getResourceName({ fileName, type });
 
 	let result = {
 		type,
 		namespaces,
 		fileName,
-		fileType
+		fileType,
+		resource
 	};
 
-	console.log(result);
 	return result;
 }
 
@@ -28,23 +29,65 @@ function modelNameToControllerName (term:String) {
 	return term + "s_controller";
 }
 
-async function openController (path:String) {
-	let { namespaces, fileName } = getFileInfo(path);
-	let controllerPath =
-		'controllers/' +
+function getResourceName ({fileName, type}: {fileName: string, type: string}) {
+	if (type === "controller") {
+		return fileName.replace(/s?_controller/, '');
+	} else {
+		return fileName;
+	}
+}
+
+function getControllerPath ({resource, namespaces}: {resource: string, namespaces: string[]}) {
+
+	return 'controllers/' +
 		namespaces.join('/') +
 		'/' +
-		modelNameToControllerName(fileName) +
+		resource + "s_controller" +
 		'.rb';
+}
 
-	console.log(controllerPath);
+function getModelPath ({resource, namespaces}: {resource: string, namespaces: string[]}) {
 
-	vscode.window.showQuickPick([controllerPath]).then(selection => {
-		if (selection) {
-			vscode.window.showInformationMessage(selection);
-		}
-	});
-	// let files = await vscode.workspace.findFiles('app/controllers/*.rb', '**/node_modules/**', 10);
+	return 'models/' +
+		namespaces.join('/') +
+		'/' +
+		resource +
+		'.rb';
+}
+
+function getViewPattern ({resource, namespaces}: {resource: string, namespaces: string[]}) {
+
+	return 'app/views/' +
+		namespaces.join('/') +
+		'/' +
+		resource +
+		's/*';
+}
+
+async function showRelatedFiles (path:String) {
+	let { namespaces, fileName, type, resource } = getFileInfo(path);
+	let files = [];
+
+	if (type !== "model") {
+		files.push(getModelPath({resource, namespaces}));
+	}
+
+	if (type !== "controller") {
+		files.push(getControllerPath({resource, namespaces}));
+	}
+
+	if (type !== "view") {
+		let searchString = getViewPattern({resource, namespaces});
+		let viewFiles = await vscode.workspace.findFiles(searchString, '**/node_modules/**', 10);
+		files.push(...viewFiles.map(file => file.path.split('app/')[1]));
+	}
+
+	let selection = await vscode.window.showQuickPick(files);
+	if (selection) {
+		let document = await vscode.workspace.openTextDocument(vscode.workspace.rootPath + '/app/' + selection);
+		vscode.window.showTextDocument(document);
+	}
+
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -55,19 +98,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let path = vscode.window.activeTextEditor?.document.uri.fsPath;
 
-		// // Display a message box to the user
-		// let files = await vscode.workspace.findFiles('app/controllers/*.rb', '**/node_modules/**', 10);
-		// let fileNames = files.map(file => file.path);
-
-		// vscode.window.showQuickPick(fileNames).then(selection => {
-		// 	if (selection) {
-		// 		vscode.window.showInformationMessage(selection);
-		// 	}
-		// });
-
 		if (path) {
-			openController(path);
+			showRelatedFiles(path);
 		}
+
+		console.log(vscode.workspace.rootPath + '/app/');
 	});
 
 	context.subscriptions.push(disposable);
