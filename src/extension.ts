@@ -29,7 +29,7 @@ function getFileInfo (fullPath:String) {
 
 function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 	if (type === "controller") {
-		return fileName.replace(/([^_]+)(?:_controller)?$/, (match, p1) => pluralize.singular(p1));
+		return pluralize.singular(fileName.replace('_controller', ''));
 	} else {
 		return fileName;
 	}
