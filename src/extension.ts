@@ -31,7 +31,7 @@ function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 	if (type === "controller") {
 		// Rewrite to use a nice regular expression instead
 		let fileNameArray = fileName.split('_');
-		let lastWord = fileNameArray.splice(-2, 2)[0];
+		let lastWord = fileNameArray.splice(-2)[0];
 		let prefix = fileNameArray.join('_');
 		let plural = pluralize.singular(lastWord);
 
