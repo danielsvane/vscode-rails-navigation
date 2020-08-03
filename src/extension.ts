@@ -28,7 +28,7 @@ function getFileInfo (fullPath:String) {
 }
 
 function getResourceName ({fileName, type}: {fileName: string, type: string}) {
-	if (type === "controller") {
+	if (type === 'controller') {
 		return pluralize.singular(fileName.replace('_controller', ''));
 	} else {
 		return fileName;
@@ -38,7 +38,7 @@ function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 function getControllerPath ({resource, namespaces}: {resource: string, namespaces: string[]}) {
 	return 'controllers/' +
 		namespaces.join('/') +
-		pluralize.plural(resource) + "_controller" +
+		pluralize.plural(resource) + '_controller' +
 		'.rb';
 }
 
@@ -62,15 +62,15 @@ async function showRelatedFiles (path:String) {
 	let { namespaces, fileName, type, resource } = getFileInfo(path);
 	let files = [];
 
-	if (type !== "model") {
+	if (type !== 'model') {
 		files.push(getModelPath({resource, namespaces}));
 	}
 
-	if (type !== "controller") {
+	if (type !== 'controller') {
 		files.push(getControllerPath({resource, namespaces}));
 	}
 
-	if (type !== "view") {
+	if (type !== 'view') {
 		let searchString = getViewPattern({resource, namespaces});
 		let viewFiles = await vscode.workspace.findFiles(searchString, '**/node_modules/**', 10);
 		files.push(...viewFiles.map(file => file.path.split('app/')[1]));
@@ -81,17 +81,11 @@ async function showRelatedFiles (path:String) {
 		let document = await vscode.workspace.openTextDocument(vscode.workspace.rootPath + '/app/' + selection);
 		vscode.window.showTextDocument(document);
 	}
-
 }
 
 export function activate(context: vscode.ExtensionContext) {
-
-	console.log('Ready');
-
 	let disposable = vscode.commands.registerCommand('rails-navigation.listFiles', async () => {
-
 		let path = vscode.window.activeTextEditor?.document.uri.fsPath;
-
 		if (path) {
 			showRelatedFiles(path);
 		}
