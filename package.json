@@ -3,6 +3,7 @@
 	"displayName": "rails-navigation",
 	"description": "Go directly to related views, controllers and models using shortcuts",
 	"version": "0.0.1",
+	"publisher": "danielsvane",
 	"engines": {
 		"vscode": "^1.47.0"
 	},
