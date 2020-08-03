@@ -1,4 +1,6 @@
+
 import * as vscode from 'vscode';
+import * as pluralize from 'pluralize';
 
 // Extracts info about file, ie is it a model, view, what is the namespace, etc
 function getFileInfo (fullPath:String) {
@@ -25,24 +27,29 @@ function getFileInfo (fullPath:String) {
 	return result;
 }
 
-function modelNameToControllerName (term:String) {
-	return term + "s_controller";
-}
-
 function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 	if (type === "controller") {
-		return fileName.replace(/s?_controller/, '');
+		// Rewrite to use a nice regular expression instead
+		let resource = fileName.replace(/_controller/, '');
+		let fileNameArray = resource.split('_');
+		let lastWord = fileNameArray.splice(fileNameArray.length - 1, 1)[0];
+		let prefix = fileNameArray.join('_');
+		let plural = pluralize.singular(lastWord);
+
+		if (prefix) {
+			return prefix + '_' + plural;
+		} else {
+			return plural;
+		}
 	} else {
 		return fileName;
 	}
 }
 
 function getControllerPath ({resource, namespaces}: {resource: string, namespaces: string[]}) {
-
 	return 'controllers/' +
 		namespaces.join('/') +
-		'/' +
-		resource + "s_controller" +
+		pluralize.plural(resource) + "_controller" +
 		'.rb';
 }
 
@@ -50,7 +57,6 @@ function getModelPath ({resource, namespaces}: {resource: string, namespaces: st
 
 	return 'models/' +
 		namespaces.join('/') +
-		'/' +
 		resource +
 		'.rb';
 }
@@ -101,8 +107,6 @@ export function activate(context: vscode.ExtensionContext) {
 		if (path) {
 			showRelatedFiles(path);
 		}
-
-		console.log(vscode.workspace.rootPath + '/app/');
 	});
 
 	context.subscriptions.push(disposable);
