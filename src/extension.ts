@@ -65,9 +65,8 @@ function getViewPattern ({resource, namespaces}: {resource: string, namespaces: 
 
 	return 'app/views/' +
 		namespaces.join('/') +
-		'/' +
-		resource +
-		's/*';
+		pluralize.plural(resource) +
+		'/*';
 }
 
 async function showRelatedFiles (path:String) {
