@@ -29,17 +29,7 @@ function getFileInfo (fullPath:String) {
 
 function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 	if (type === "controller") {
-		// Rewrite to use a nice regular expression instead
-		let fileNameArray = fileName.split('_');
-		let lastWord = fileNameArray.splice(-2)[0];
-		let prefix = fileNameArray.join('_');
-		let plural = pluralize.singular(lastWord);
-
-		if (prefix) {
-			return prefix + '_' + plural;
-		} else {
-			return plural;
-		}
+		return fileName.replace(/([^_]+)(?:_controller)?$/, (match, p1) => pluralize.singular(p1));
 	} else {
 		return fileName;
 	}
