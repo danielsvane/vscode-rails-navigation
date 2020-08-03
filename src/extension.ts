@@ -30,9 +30,8 @@ function getFileInfo (fullPath:String) {
 function getResourceName ({fileName, type}: {fileName: string, type: string}) {
 	if (type === "controller") {
 		// Rewrite to use a nice regular expression instead
-		let resource = fileName.replace(/_controller/, '');
-		let fileNameArray = resource.split('_');
-		let lastWord = fileNameArray.splice(fileNameArray.length - 1, 1)[0];
+		let fileNameArray = fileName.split('_');
+		let lastWord = fileNameArray.splice(-2, 2)[0];
 		let prefix = fileNameArray.join('_');
 		let plural = pluralize.singular(lastWord);
 
